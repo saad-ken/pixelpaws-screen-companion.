@@ -1,4 +1,4 @@
-﻿:root{font-family:Inter,Segoe UI,system-ui,sans-serif;color:#edf3f7;background:#0b1018;font-synthesis:none}*{box-sizing:border-box}body{margin:0;min-width:100%;min-height:100vh;overflow:hidden;background:#0b1018}button,textarea{font:inherit}button{border:0;cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}html:has(body.floating-page),body.floating-page{background:transparent !important;overflow:hidden}body:has(.orb){background:transparent;overflow:hidden}
+:root{font-family:Inter,Segoe UI,system-ui,sans-serif;color:#edf3f7;background:#0b1018;font-synthesis:none}*{box-sizing:border-box}body{margin:0;min-width:100%;min-height:100vh;overflow:hidden;background:#0b1018}button,textarea{font:inherit}button{border:0;cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}html:has(body.floating-page),body.floating-page{background:transparent !important;overflow:hidden}body:has(.orb){background:transparent;overflow:hidden}
 /* Floating cat companion */
 .orb{width:72px;height:72px;padding:0;background:transparent;border-radius:50%;box-shadow:none;transition:transform .18s ease,filter .18s ease}.orb:hover{transform:translateY(-3px) scale(1.06);filter:drop-shadow(0 10px 14px #0008)}.orb img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
 /* Desktop chat shell */
@@ -35,3 +35,4 @@ section{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;heigh
 .gmail-connect-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.gmail-connect-row button{padding:8px 10px;color:#c8d7e5;background:#ffffff0b;border:1px solid #ffffff14;border-radius:8px;font-size:11px;font-weight:650}.gmail-connect-row button:first-child{color:#08251e;background:#a9f2dd;border-color:#a9f2dd}.gmail-connect-row small{color:#91a1b2;font-size:10px}
 .news-count{display:flex;align-items:center;gap:8px;color:#91a1b2;font-size:11px}.news-count select{width:auto;margin:0;padding:7px 9px;color:#edf3f7;background:#090f17;border:1px solid #ffffff12;border-radius:8px}
 
+.news-topic{display:flex;flex-direction:column;gap:5px;color:#91a1b2;font-size:11px}.news-topic select{margin:0}
