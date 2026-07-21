@@ -111,10 +111,3 @@ The test command checks the Electron entry points and the Vite build verifies th
 ## Third-party software
 
 This project uses Electron, React, Vite, Express, OpenAI's official Node SDK, Playwright, Zod, better-sqlite3, concurrently, and wait-on. Review each dependency's license and terms before publishing the repository. The project does not include copyrighted music or third-party brand assets in its submission materials.
-
-## Submission links to fill in
-
-- Repository: **TODO — publish this repository and paste the URL here**
-- Demo video: **TODO — upload a public YouTube video under three minutes**
-- Codex `/feedback` Session ID: **TODO — run `/feedback` in the Codex project thread and paste the ID here**
-
