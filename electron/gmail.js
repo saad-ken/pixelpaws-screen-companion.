@@ -6,6 +6,7 @@ import { app, safeStorage, shell } from 'electron';
 import { google } from 'googleapis';
 
 const SCOPES = ['https://www.googleapis.com/auth/gmail.send'];
+const DEFAULT_REDIRECT_URI = 'http://127.0.0.1:4390/oauth2callback';
 const DEFAULT_CLIENT_ID = '91065729569-l19g602vsdgjncrf4bsqh5f25brkva1a.apps.googleusercontent.com';
 let oauthClient;
 
@@ -41,10 +42,11 @@ export function gmailStatus() {
 }
 export async function connectGmail() {
   const { clientId, clientSecret } = clientConfig();
+  const redirectUri = String(process.env.GOOGLE_REDIRECT_URI || DEFAULT_REDIRECT_URI).trim();
+  const redirect = new URL(redirectUri);
+  if (redirect.protocol !== 'http:' || !redirect.hostname || !redirect.port) throw Error('GOOGLE_REDIRECT_URI must be a local HTTP callback such as http://127.0.0.1:4390/oauth2callback.');
   const server = http.createServer();
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const port = server.address().port;
-  const redirectUri = `http://127.0.0.1:${port}/oauth2callback`;
+  await new Promise((resolve, reject) => { server.once('error', reject); server.listen(Number(redirect.port), redirect.hostname, resolve); });
   const client = new google.auth.OAuth2(clientId, clientSecret, redirectUri);
   const authUrl = client.generateAuthUrl({ access_type: 'offline', prompt: 'consent', scope: SCOPES });
   const result = await new Promise((resolve, reject) => {
@@ -82,3 +84,4 @@ export async function sendGmailMessage({ to, subject, text }) {
   const encoded = Buffer.from(raw).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   await gmail.users.messages.send({ userId: 'me', requestBody: { raw: encoded } });
 }
+
