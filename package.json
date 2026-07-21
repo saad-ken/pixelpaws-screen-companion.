@@ -1,30 +1,31 @@
 {
-    "name":  "screen-companion-ai",
-    "version":  "0.1.0",
-    "private":  true,
-    "type":  "module",
-    "main":  "electron/main.js",
-    "scripts":  {
-                    "dev":  "concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:127.0.0.1:5173 \u0026\u0026 set ELECTRON_RUN_AS_NODE=\u0026\u0026 electron .\"",
-                    "build":  "vite build",
-                    "start":  "set ELECTRON_RUN_AS_NODE=\u0026\u0026 electron .",
-                    "test":  "node --check electron/main.js \u0026\u0026 node --check electron/server.js \u0026\u0026 node --check electron/preload.js"
-                },
-    "dependencies":  {
-                         "better-sqlite3":  "latest",
-                         "express":  "latest",
-                         "openai":  "latest",
-                         "playwright":  "^1.61.1",
-                         "react":  "latest",
-                         "react-dom":  "latest",
-                         "zod":  "latest"
-                     },
-    "devDependencies":  {
-                            "@electron/rebuild":  "^4.2.0",
-                            "@vitejs/plugin-react":  "latest",
-                            "concurrently":  "latest",
-                            "electron":  "latest",
-                            "vite":  "latest",
-                            "wait-on":  "latest"
-                        }
+    "name": "screen-companion-ai",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "electron/main.js",
+    "scripts": {
+        "dev": "concurrently -k \"vite --host 127.0.0.1\" \"wait-on tcp:127.0.0.1:5173 && set ELECTRON_RUN_AS_NODE=&& electron .\"",
+        "build": "vite build",
+        "start": "set ELECTRON_RUN_AS_NODE=&& electron .",
+        "test": "node --check electron/main.js && node --check electron/server.js && node --check electron/preload.js"
+    },
+    "dependencies": {
+        "better-sqlite3": "latest",
+        "express": "latest",
+        "nodemailer": "^9.0.3",
+        "openai": "latest",
+        "playwright": "^1.61.1",
+        "react": "latest",
+        "react-dom": "latest",
+        "zod": "latest"
+    },
+    "devDependencies": {
+        "@electron/rebuild": "^4.2.0",
+        "@vitejs/plugin-react": "latest",
+        "concurrently": "latest",
+        "electron": "latest",
+        "vite": "latest",
+        "wait-on": "latest"
+    }
 }
