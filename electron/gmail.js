@@ -1,4 +1,4 @@
-﻿import http from 'node:http';
+import http from 'node:http';
 import { URL } from 'node:url';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -79,12 +79,36 @@ export function connectGmail() {
   return oauthFlow;
 }
 export function disconnectGmail() { try { fs.rmSync(tokenPath(), { force: true }); } catch {} oauthClient = null; return { connected: false, configured: true, email: '' }; }
-export async function sendGmailMessage({ to, subject, text }) {
+export async function sendGmailMessage({ to, subject, text, html }) {
   const tokens = loadTokens();
   if (!tokens) throw Error('Connect Gmail before running an email schedule.');
   const client = oauthClient || makeClient();
   const gmail = google.gmail({ version: 'v1', auth: client });
-  const raw = [`To: ${to}`, `Subject: ${subject}`, 'Content-Type: text/plain; charset=utf-8', '', text].join('\r\n');
+  const raw = html
+    ? (() => {
+        const boundary = `PixelPawsBoundary${Date.now()}`;
+        return [
+          `To: ${to}`,
+          `Subject: ${subject}`,
+          'MIME-Version: 1.0',
+          `Content-Type: multipart/alternative; boundary="${boundary}"`,
+          '',
+          `--${boundary}`,
+          'Content-Type: text/plain; charset="UTF-8"',
+          'Content-Transfer-Encoding: 8bit',
+          '',
+          text,
+          '',
+          `--${boundary}`,
+          'Content-Type: text/html; charset="UTF-8"',
+          'Content-Transfer-Encoding: 8bit',
+          '',
+          html,
+          '',
+          `--${boundary}--`,
+        ].join('\r\n');
+      })()
+    : [`To: ${to}`, `Subject: ${subject}`, 'Content-Type: text/plain; charset=utf-8', '', text].join('\r\n');
   const encoded = Buffer.from(raw).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   await gmail.users.messages.send({ userId: 'me', requestBody: { raw: encoded } });
 }

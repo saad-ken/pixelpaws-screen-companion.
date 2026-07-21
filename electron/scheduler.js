@@ -1,4 +1,4 @@
-﻿import fs from 'node:fs';
+import fs from 'node:fs';
 import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
@@ -18,13 +18,28 @@ function parseNews(xml) {
     return { title: cleanFeedText(value('title')), link: decodeHtml(value('link')).trim(), date: cleanFeedText(value('pubDate')), description: cleanFeedText(value('description')).slice(0, 500) };
   }).filter((item) => item.title && item.link);
 }
-async function getNews(topic, count = 3) {
-  const url = 'https://news.google.com/rss/search?q=' + encodeURIComponent(topic) + '&hl=en-IN&gl=IN&ceid=IN:en';
+async function fetchRss(url) {
   const response = await fetch(url, { headers: { 'User-Agent': 'PixelPaws/1.0 news reader' } });
   if (!response.ok) throw Error('News source could not be reached.');
-  const articles = parseNews(await response.text()).slice(0, Math.max(3, Math.min(10, Number(count) || 3)));
-  if (!articles.length) throw Error('No recent news was found for this topic.');
-  return articles;
+  return parseNews(await response.text());
+}
+async function getNews(topic, count = 3) {
+  const query = encodeURIComponent(topic);
+  const urls = [
+    'https://news.google.com/rss/search?q=' + query + '&hl=en-IN&gl=IN&ceid=IN:en',
+    'https://www.bing.com/news/search?q=' + query + '&format=rss',
+  ];
+  const results = await Promise.allSettled(urls.map(fetchRss));
+  const articles = results.flatMap((result) => result.status === 'fulfilled' ? result.value : []);
+  const unique = [];
+  const seen = new Set();
+  for (const article of articles) {
+    const key = article.title.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+    if (!seen.has(key)) { seen.add(key); unique.push(article); }
+  }
+  const selected = unique.slice(0, Math.max(3, Math.min(10, Number(count) || 3)));
+  if (!selected.length) throw Error('No recent news was found for this topic.');
+  return selected;
 }
 async function summarizeNews(topic, articles) {
   const source = articles.map((item, index) => `${index + 1}. ${item.title}\n${item.description}\nSource URL: ${item.link}`).join('\n\n');
@@ -33,14 +48,21 @@ async function summarizeNews(topic, articles) {
   const result = await client.chat.completions.create({ model: process.env.OPENAI_MODEL || 'gpt-5-mini', messages: [{ role: 'user', content: `Create a concise daily news digest about ${topic}. Start with a 2-3 sentence overall summary. Then cover exactly these ${articles.length} articles in numbered sections. For every article include its title, a short explanation of why it matters, and exactly one Source URL. Use only the supplied details and do not invent facts.\n\n${source}` }], max_completion_tokens: 1000 });
   return String(result.choices[0]?.message?.content || source).trim();
 }
+function escapeHtml(value) { return String(value || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;'); }
+function buildNewsHtml(topic, summary, articles) {
+  const cards = articles.map((item, index) => `<li style="margin:0 0 22px"><h3 style="margin:0 0 6px;color:#183b56">${index + 1}. ${escapeHtml(item.title)}</h3><p style="margin:0 0 7px;line-height:1.5;color:#334155">${escapeHtml(item.description || 'Read the source for the full article.')}</p><a href="${escapeHtml(item.link)}" style="color:#1769aa">Read source article</a></li>`).join('');
+  return `<!doctype html><html><body style="margin:0;background:#f4f7fb;font-family:Arial,sans-serif;color:#172033"><div style="max-width:720px;margin:24px auto;background:#fff;border:1px solid #dce4ee;border-radius:12px;overflow:hidden"><div style="padding:24px;background:#102338;color:#fff"><div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#9df0d7">PixelPaws</div><h1 style="margin:8px 0 0;font-size:26px">Daily news summary</h1><p style="margin:8px 0 0;color:#d7e5f2">${escapeHtml(topic)}</p></div><div style="padding:24px"><h2 style="margin:0 0 8px;color:#183b56">Summary</h2><p style="line-height:1.6;white-space:pre-wrap">${escapeHtml(summary)}</p><h2 style="margin:28px 0 12px;color:#183b56">${articles.length} selected articles</h2><ol style="padding-left:22px">${cards}</ol><p style="margin-top:28px;color:#718096;font-size:12px">Sources were collected from Google News RSS and Bing News RSS.</p></div></div></body></html>`;
+}
 async function sendNewsEmail(task) {
   const to = String(task.emailTo || '').trim();
   if (!validEmail(to)) throw Error('Enter a valid recipient email address.');
   const topic = String(task.newsTopic || task.content || 'technology and AI news').trim().slice(0, 200);
   const articles = await getNews(topic, task.newsCount || 3);
-  const text = await summarizeNews(topic, articles);
-  await sendGmailMessage({ to, subject: `PixelPaws daily news: ${topic}`, text });
-  return `Sent a ${articles.length}-article news summary to ${to}.`;
+  const summary = await summarizeNews(topic, articles);
+  const text = `PixelPaws daily news summary: ${topic}\n\n${summary}\n\nSources:\n${articles.map((item, index) => `${index + 1}. ${item.title}\n${item.link}`).join('\n\n')}`;
+  const html = buildNewsHtml(topic, summary, articles);
+  await sendGmailMessage({ to, subject: `PixelPaws daily news: ${topic}`, text, html });
+  return `Sent a structured ${articles.length}-article news summary to ${to}.`;
 }
 async function runTask(task) {
   if (task.kind === 'vscode') {
@@ -93,3 +115,4 @@ export function startScheduler(file, onRun = () => {}) {
     stop: () => clearInterval(timer),
   };
 }
+
