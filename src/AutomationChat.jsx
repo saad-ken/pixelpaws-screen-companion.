@@ -17,7 +17,7 @@ export default function AutomationChat({ automationId, task, notice, screenImage
   }, [messages]);
 
   async function send(promptText) {
-    const text=(promptText || input).trim(); if(!text||busy)return;
+    const text=(typeof promptText === 'string' ? promptText : input).trim(); if(!text||busy)return;
     setInput(''); setBusy(true);
     setMessages((items)=>[...items,{role:'user',text},{role:'assistant',text:'Thinking...'}]);
     try {
@@ -34,6 +34,6 @@ export default function AutomationChat({ automationId, task, notice, screenImage
   return <div className="automation-card automation-chat">
     <div className="automation-chat-heading"><div><h3>Automation chat</h3><p>Ask about the plan or explain a failed step.</p></div><span>{busy?'Thinking...':'Ready'}</span><button className="observe-question" onClick={()=>send("Look at the current screen frame and tell me what is visible and what I should click next. Do not click anything.")} disabled={!screenImage||busy}>Ask AI about frame</button></div>
     <div className="automation-chat-messages" ref={scrollRef}>{messages.map((message,index)=><div className={message.role==='user'?'automation-chat-message user':'automation-chat-message'} key={index}><b>{message.role==='user'?'You':'AI'}</b><span>{message.text}</span><button className="observe-question" onClick={()=>send("Look at the current screen frame and tell me what is visible and what I should click next. Do not click anything.")} disabled={!screenImage||busy}>Ask AI about frame</button></div>)}</div>
-    <div className="automation-chat-input"><textarea value={input} onChange={(event)=>setInput(event.target.value)} onKeyDown={(event)=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}}} placeholder="Ask about this automation..." disabled={busy}/><button className="send" onClick={send} disabled={!input.trim()||busy}>Send</button></div>
+    <div className="automation-chat-input"><textarea value={input} onChange={(event)=>setInput(event.target.value)} onKeyDown={(event)=>{if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}}} placeholder="Ask about this automation..." disabled={busy}/><button className="send" onClick={() => send()} disabled={!input.trim()||busy}>Send</button></div>
   </div>;
 }
