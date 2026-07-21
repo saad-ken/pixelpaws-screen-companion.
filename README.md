@@ -111,3 +111,17 @@ The test command checks the Electron entry points and the Vite build verifies th
 ## Third-party software
 
 This project uses Electron, React, Vite, Express, OpenAI's official Node SDK, Playwright, Zod, better-sqlite3, concurrently, and wait-on. Review each dependency's license and terms before publishing the repository. The project does not include copyrighted music or third-party brand assets in its submission materials.
+
+## Latest features
+
+- Natural-language scheduled news setup extracts the time, recipient, topic, and article count into the correct fields. Example: `send Indian news at 3:25 PM to someone@example.com`.
+- News schedules support Politics, Finance and markets, Technology and AI, World news, India news, Science and health, Business and startups, Sports, and custom topics.
+- News emails combine Google News RSS and Bing News RSS, remove duplicates, and send a structured HTML email with an AI summary, article descriptions, and clickable source links. A plain-text fallback is included.
+- Gmail sending uses the user's own Google OAuth connection. No Gmail password, OAuth token, API key, or `.env` file belongs in the repository.
+- Automation Chat supports explanations and frame questions; CAPTCHA and human-verification challenges are never bypassed.
+
+## Submission notes
+
+Repository: https://github.com/saad-ken/pixelpaws-screen-companion..
+
+For the Devpost `/feedback` requirement, type `/feedback` in the Codex thread where most of the project was built, choose to include the existing session, submit, and copy the generated Codex Session ID. This is different from a Git commit ID.
