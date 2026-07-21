@@ -33,3 +33,5 @@ section{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;heigh
 .training-url{min-width:220px;padding:8px 10px;color:#edf3f7;background:#090f17;border:1px solid #ffffff16;border-radius:8px;font-size:11px;outline:0}
 .observe-question{padding:7px 9px;color:#b9f5e2;background:#ffffff0a;border:1px solid #ffffff12;border-radius:7px;font-size:10px;font-weight:650}.observe-question:hover{background:#ffffff16}
 .gmail-connect-row{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.gmail-connect-row button{padding:8px 10px;color:#c8d7e5;background:#ffffff0b;border:1px solid #ffffff14;border-radius:8px;font-size:11px;font-weight:650}.gmail-connect-row button:first-child{color:#08251e;background:#a9f2dd;border-color:#a9f2dd}.gmail-connect-row small{color:#91a1b2;font-size:10px}
+.news-count{display:flex;align-items:center;gap:8px;color:#91a1b2;font-size:11px}.news-count select{width:auto;margin:0;padding:7px 9px;color:#edf3f7;background:#090f17;border:1px solid #ffffff12;border-radius:8px}
+
