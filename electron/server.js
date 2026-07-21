@@ -1,4 +1,4 @@
-﻿import express from 'express';
+import express from 'express';
 import http from 'node:http';
 import fs from 'node:fs';
 import path from 'node:path';
@@ -28,8 +28,40 @@ export async function createServer() {
   api.get('/api/sessions/:id/messages', (req, res) => res.json(read().messages.filter((item) => item.session_id === req.params.id)));
   api.delete('/api/sessions/:id', (req, res) => { const data = read(); const exists = data.sessions.some((item) => item.id === req.params.id); data.sessions = data.sessions.filter((item) => item.id !== req.params.id); data.messages = data.messages.filter((item) => item.session_id !== req.params.id); write(data); return exists ? res.json({ ok: true }) : res.status(404).json({ error: 'Session not found.' }); });
   const automationTaskSchema = z.object({ task: z.string().trim().min(3).max(1000), title: z.string().trim().max(80).optional() });
-  api.post('/api/scheduled/interpret', async (req, res) => { const input=String(req.body?.instruction||'').trim(); const language=String(req.body?.language||'auto').trim().slice(0,60) || 'auto'; if(input.length<3)return res.status(400).json({error:'Describe the scheduled task first.'}); try { if(!process.env.OPENAI_API_KEY){ const match=input.match(/(?:at|@)[ ]*(\d{1,2})(?::(\d{2}))?[ ]*(am|pm)?/i); let hour=match?Number(match[1]):9; const minute=match?.[2]||'00'; const suffix=(match?.[3]||'').toLowerCase(); if(suffix==='pm'&&hour<12)hour+=12; if(suffix==='am'&&hour===12)hour=0; return res.json({title:input.slice(0,80),time:String(hour).padStart(2,'0')+':'+minute,kind:/gmail|email|mail/i.test(input)?'gmail':'vscode',filePath:'scheduled-note.txt',language,content:input, command:(input.match(/npm\s+(run\s+)?(dev|start|test|build)/i)?.[0] || '')}); } const client=new OpenAI({apiKey:process.env.OPENAI_API_KEY}); const result=await client.chat.completions.create({model:process.env.OPENAI_MODEL||'gpt-5-mini',messages:[{role:'user',content:'Convert this scheduled desktop task into JSON. If the instruction asks for code, generate complete runnable boilerplate in content for the requested language. Target language: '+language+'. Instruction: '+input+' Return only title, time HH:MM, kind vscode or gmail, filePath, content, and optional command. command may only be npm run dev, npm start, npm test, npm build, node file.js, or python file.py. Use daily scheduling. Never include passwords or claim an email was sent.'}],response_format:{type:'json_object'},max_completion_tokens:400}); const raw=result.choices[0]?.message?.content||'{}'; const parsed = JSON.parse(raw); return res.json(parsed.time && parsed.kind ? { ...parsed, language: parsed.language || language } : fallbackSchedule(input, language)); } catch(error){ console.error('[scheduled interpret]',error.message); return res.status(400).json({error:'AI could not understand this schedule.'}); } });
-  api.get('/api/skills', (_, res) => res.json(listSkills()));
+  api.post('/api/scheduled/interpret', async (req, res) => {
+    const input = String(req.body?.instruction || '').trim();
+    const language = String(req.body?.language || 'auto').trim().slice(0, 60) || 'auto';
+    if (input.length < 3) return res.status(400).json({ error: 'Describe the scheduled task first.' });
+    const fallback = () => {
+      const match = input.match(/(?:at|@)\s*(\d{1,2})(?::|\s)?(\d{2})?\s*(am|pm)?/i);
+      let hour = match ? Number(match[1]) : 9;
+      const minute = match?.[2] || '00';
+      const suffix = (match?.[3] || '').toLowerCase();
+      if (suffix === 'pm' && hour < 12) hour += 12;
+      if (suffix === 'am' && hour === 12) hour = 0;
+      const emailTo = input.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0] || '';
+      const isGmail = /gmail|email|mail|news/i.test(input);
+      const lower = input.toLowerCase();
+      const newsTopic = /politic/.test(lower) ? 'Politics' : /finance|market|stock/.test(lower) ? 'Finance and markets' : /india|indian/.test(lower) ? 'India news' : /world|global/.test(lower) ? 'World news' : /sport/.test(lower) ? 'Sports' : /science|health/.test(lower) ? 'Science and health' : 'Technology and AI';
+      const count = Number(input.match(/\b(3|5|10)\s+(?:news|article)/i)?.[1] || 3);
+      return { title: input.slice(0, 80), time: String(hour).padStart(2, '0') + ':' + minute, kind: isGmail ? 'gmail' : 'vscode', filePath: 'scheduled-note.txt', language, content: input, emailTo, newsTopic, newsCount: count, command: (input.match(/npm\s+(run\s+)?(dev|start|test|build)/i)?.[0] || '') };
+    };
+    try {
+      if (!process.env.OPENAI_API_KEY) return res.json(fallback());
+      const client = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+      const result = await client.chat.completions.create({
+        model: process.env.OPENAI_MODEL || 'gpt-5-mini',
+        messages: [{ role: 'user', content: 'Convert this scheduled desktop task into JSON. For Gmail/news tasks, extract the recipient email into emailTo, normalize the subject into newsTopic (examples: Politics, Finance and markets, India news, Technology and AI), and extract 3, 5, or 10 into newsCount. For code tasks, generate complete runnable boilerplate in content for the requested language. Target language: ' + language + '. Instruction: ' + input + ' Return only title, time HH:MM, kind vscode or gmail, filePath, content, emailTo, newsTopic, newsCount, and optional command. command may only be npm run dev, npm start, npm test, npm build, node file.js, or python file.py. Use daily scheduling. Never include passwords or claim an email was sent.' }],
+        response_format: { type: 'json_object' },
+        max_completion_tokens: 500,
+      });
+      const parsed = JSON.parse(result.choices[0]?.message?.content || '{}');
+      return res.json(parsed.time && parsed.kind ? { ...parsed, language: parsed.language || language } : fallback());
+    } catch (error) {
+      console.error('[scheduled interpret]', error.message);
+      return res.status(400).json({ error: 'AI could not understand this schedule.' });
+    }
+  });  api.get('/api/skills', (_, res) => res.json(listSkills()));
   api.post('/api/skills', (req, res) => { const parsed=z.object({title:z.string().trim().min(2).max(100),instructions:z.string().trim().min(3).max(2000)}).safeParse(req.body); if(!parsed.success)return res.status(400).json({error:'Add a skill title and instructions.'}); return res.json(createSkill(parsed.data.title,parsed.data.instructions)); });
   api.delete('/api/skills/:id', (req, res) => deleteSkill(req.params.id)?res.json({ok:true}):res.status(404).json({error:'Skill not found.'}));
   api.get('/api/automations/config', (_, res) => res.json({ hasApiKey: Boolean(process.env.OPENAI_API_KEY) }));
