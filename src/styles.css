@@ -1,4 +1,4 @@
-:root{font-family:Inter,Segoe UI,system-ui,sans-serif;color:#edf3f7;background:#0b1018;font-synthesis:none}*{box-sizing:border-box}body{margin:0;min-width:100%;min-height:100vh;overflow:hidden;background:#0b1018}button,textarea{font:inherit}button{border:0;cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}html:has(body.floating-page),body.floating-page{background:transparent !important;overflow:hidden}body:has(.orb){background:transparent;overflow:hidden}
+﻿:root{font-family:Inter,Segoe UI,system-ui,sans-serif;color:#edf3f7;background:#0b1018;font-synthesis:none}*{box-sizing:border-box}body{margin:0;min-width:100%;min-height:100vh;overflow:hidden;background:#0b1018}button,textarea{font:inherit}button{border:0;cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}html:has(body.floating-page),body.floating-page{background:transparent !important;overflow:hidden}body:has(.orb){background:transparent;overflow:hidden}
 /* Floating cat companion */
 .orb{width:72px;height:72px;padding:0;background:transparent;border-radius:50%;box-shadow:none;transition:transform .18s ease,filter .18s ease}.orb:hover{transform:translateY(-3px) scale(1.06);filter:drop-shadow(0 10px 14px #0008)}.orb img{display:block;width:100%;height:100%;object-fit:contain;pointer-events:none}
 /* Desktop chat shell */
@@ -32,3 +32,12 @@ section{display:flex;flex:1;flex-direction:column;min-width:0;min-height:0;heigh
 .automation-observe-toolbar{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #66dfc534;border-radius:11px;background:#0b1820}.automation-observe-toolbar button{padding:8px 11px;color:#08251e;background:#a9f2dd;border-radius:8px;font-size:11px;font-weight:750}.automation-observe-toolbar small{color:#91aaa8;font-size:11px}.automation-live-observe{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.automation-live-observe .live-share-card{margin:0}.automation-live-observe>img{width:100%;max-height:190px;object-fit:contain;border:1px solid #66dfc534;border-radius:11px;background:#05090e}@media(max-width:850px){.automation-live-observe{grid-template-columns:1fr}}
 .training-url{min-width:220px;padding:8px 10px;color:#edf3f7;background:#090f17;border:1px solid #ffffff16;border-radius:8px;font-size:11px;outline:0}
 .observe-question{padding:7px 9px;color:#b9f5e2;background:#ffffff0a;border:1px solid #ffffff12;border-radius:7px;font-size:10px;font-weight:650}.observe-question:hover{background:#ffffff16}
+/* Scheduled page: one predictable page scroll and a compact AI code row. */
+.scheduled-panel{overflow-x:hidden;overflow-y:auto;scrollbar-width:thin;scrollbar-color:#60758d88 transparent}
+.scheduled-panel::-webkit-scrollbar{width:10px}
+.scheduled-panel::-webkit-scrollbar-thumb{background:#60758d88;border:3px solid transparent;border-radius:999px;background-clip:padding-box}
+.scheduled-layout{align-items:start;min-height:0}
+.scheduled-list{max-height:none;overflow:visible}
+.scheduled-ai-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:stretch}
+.scheduled-ai-row button{min-width:170px}
+@media(max-width:760px){.scheduled-ai-row{grid-template-columns:1fr}.scheduled-ai-row button{width:100%}}
