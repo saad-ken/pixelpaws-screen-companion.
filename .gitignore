@@ -1,0 +1,7 @@
+﻿node_modules/
+dist/
+.env
+*.db
+*.log
+scheduled-note.*
+screen-companion-*.json
