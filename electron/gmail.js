@@ -63,10 +63,9 @@ async function connectGmailFlow() {
         if (error) return reject(Error('Gmail authorization was cancelled.'));
         const tokenResult = await client.getToken(code);
         client.setCredentials(tokenResult.tokens);
-        const gmail = google.gmail({ version: 'v1', auth: client });
-        const profile = await gmail.users.getProfile({ userId: 'me' });
-        saveTokens({ ...tokenResult.tokens, email: profile.data.emailAddress || '' });
-        resolve({ connected: true, configured: true, email: profile.data.emailAddress || '' });
+        // The gmail.send scope is intentionally minimal; do not request a profile read.
+        saveTokens({ ...tokenResult.tokens });
+        resolve({ connected: true, configured: true, email: '' });
       } catch (err) { clearTimeout(timeout); server.close(); reject(err); }
     });
     shell.openExternal(authUrl).catch(reject);
@@ -89,5 +88,6 @@ export async function sendGmailMessage({ to, subject, text }) {
   const encoded = Buffer.from(raw).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   await gmail.users.messages.send({ userId: 'me', requestBody: { raw: encoded } });
 }
+
 
 
