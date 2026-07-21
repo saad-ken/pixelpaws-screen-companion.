@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer } = require('electron');
+﻿const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('companion', {
   openChat: () => ipcRenderer.send('open-chat'),
   beginDrag: (screenX, screenY) => ipcRenderer.send('begin-float-drag', { screenX, screenY }),
@@ -13,6 +13,9 @@ contextBridge.exposeInMainWorld('companion', {
   schedulerToggle: (id, enabled) => ipcRenderer.invoke('scheduler-toggle', id, enabled),
   schedulerRunNow: (id) => ipcRenderer.invoke('scheduler-run-now', id),
   schedulerDelete: (id) => ipcRenderer.invoke('scheduler-delete', id),
+  gmailConnect: () => ipcRenderer.invoke('gmail-connect'),
+  gmailDisconnect: () => ipcRenderer.invoke('gmail-disconnect'),
+  gmailStatus: () => ipcRenderer.invoke('gmail-status'),
   config: () => ipcRenderer.invoke('config'),
   saveOpenAISettings: (settings) => ipcRenderer.invoke('save-openai-settings', settings),
   clearOpenAISettings: () => ipcRenderer.invoke('clear-openai-settings'),

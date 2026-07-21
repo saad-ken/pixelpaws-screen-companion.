@@ -1,10 +1,11 @@
-import { app, BrowserWindow, desktopCapturer, globalShortcut, ipcMain, screen, Menu, safeStorage } from 'electron';
+﻿import { app, BrowserWindow, desktopCapturer, globalShortcut, ipcMain, screen, Menu, safeStorage } from 'electron';
 import path from 'node:path';
 import fs from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import dotenv from 'dotenv';
 import { createServer } from './server.js';
 import { startScheduler } from './scheduler.js';
+import { connectGmail, disconnectGmail, gmailStatus } from './gmail.js';
 
 dotenv.config();
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -99,6 +100,9 @@ app.whenReady().then(async () => {
   ipcMain.handle('scheduler-toggle', (event, id, enabled) => scheduler?.toggle(id, enabled));
   ipcMain.handle('scheduler-run-now', async (event, id) => scheduler?.runNow(id));
   ipcMain.handle('scheduler-delete', (event, id) => scheduler?.remove(id));
+  ipcMain.handle('gmail-connect', () => connectGmail());
+  ipcMain.handle('gmail-disconnect', () => disconnectGmail());
+  ipcMain.handle('gmail-status', () => gmailStatus());
   ipcMain.handle('config', () => ({ hasApiKey: Boolean(process.env.OPENAI_API_KEY), model: process.env.OPENAI_MODEL || 'gpt-5-mini' }));
   ipcMain.handle('save-openai-settings', (event, settings) => saveOpenAISettings(settings || {}));
   ipcMain.handle('clear-openai-settings', () => clearOpenAISettings());

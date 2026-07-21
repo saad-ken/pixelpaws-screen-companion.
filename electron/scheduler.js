@@ -3,7 +3,7 @@ import path from 'node:path';
 import { randomUUID } from 'node:crypto';
 import { spawn } from 'node:child_process';
 import OpenAI from 'openai';
-import nodemailer from 'nodemailer';
+import { sendGmailMessage } from './gmail.js';
 
 function read(file) { try { return JSON.parse(fs.readFileSync(file, 'utf8')); } catch { return []; } }
 function write(file, items) { fs.writeFileSync(file, JSON.stringify(items, null, 2), 'utf8'); }
@@ -34,17 +34,12 @@ async function summarizeNews(topic, articles) {
 async function sendNewsEmail(task) {
   const to = String(task.emailTo || '').trim();
   if (!validEmail(to)) throw Error('Enter a valid recipient email address.');
-  const user = String(process.env.GMAIL_USER || '').trim();
-  const pass = String(process.env.GMAIL_APP_PASSWORD || '').trim();
-  if (!user || !pass) throw Error('Add GMAIL_USER and GMAIL_APP_PASSWORD to the local environment before running email schedules.');
   const topic = String(task.newsTopic || task.content || 'technology and AI news').trim().slice(0, 200);
   const articles = await getNews(topic);
   const text = await summarizeNews(topic, articles);
-  const transporter = nodemailer.createTransport({ service: 'gmail', auth: { user, pass } });
-  await transporter.sendMail({ from: user, to, subject: `PixelPaws daily news: ${topic}`, text });
+  await sendGmailMessage({ to, subject: `PixelPaws daily news: ${topic}`, text });
   return `Sent a ${articles.length}-article news summary to ${to}.`;
-}
-async function runTask(task) {
+}async function runTask(task) {
   if (task.kind === 'vscode') {
     let target = path.resolve(task.filePath || 'scheduled-note.txt');
     if (fs.existsSync(target) && fs.statSync(target).isDirectory()) target = path.join(target, 'scheduled-note.txt');
@@ -97,3 +92,4 @@ export function startScheduler(file, onRun = () => {}) {
     stop: () => clearInterval(timer),
   };
 }
+
