@@ -29,14 +29,6 @@ The same companion can inspect a manually captured screen, optionally show a loc
 
 The demo is intentionally read-only and bounded. It does not bypass CAPTCHA, solve human-verification challenges, submit applications, send messages, make purchases, or use passwords. Scheduled commands are allow-listed and should only be used with a test project. The user must review and explicitly start an automation.
 
-## Required links
-
-- Public code repository: `TODO`
-- Public YouTube demo, less than three minutes: `TODO`
-- Codex `/feedback` Session ID: `TODO`
-
-Candidate video link supplied during development: `https://youtu.be/gSn8OUulEyM` — verify that it is public, has clear audio, demonstrates the final build, and is shorter than three minutes before submitting.
-
 ## Prior work disclosure
 
 The original project was a Screen Companion prototype. Work to document as submission-period extension includes the reusable automation library, semantic browser action loop, single-tab/duplicate protection, Automation chat, local live observation, reusable skills, daily scheduler, secure model settings, Demo mode, UI polish, and reliability fixes. Provide dated Codex logs or commits as evidence rather than relying on this statement alone.
