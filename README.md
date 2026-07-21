@@ -58,7 +58,13 @@ npm run build
 npm start
 ```
 
-Copy `.env.example` to `.env` only if you want environment-based configuration. Never commit `.env` or an API key.
+You can add your OpenAI key locally in the project itself by copying `.env.example` to `.env` in the project root:
+
+```powershell
+Copy-Item .env.example .env
+```
+
+Then edit `.env`:
 
 ```dotenv
 OPENAI_API_KEY=your_key_here
@@ -66,7 +72,7 @@ OPENAI_MODEL=gpt-5.6-sol
 PORT=4387
 ```
 
-The app also provides an OpenAI Settings modal. For a low-cost development run, choose the project's lower-cost model setting there; for the hackathon demonstration, use the GPT-5.6 configuration above. The runtime keeps the model configurable rather than hardcoding a secret or model choice.
+Alternatively, open PixelPaws Settings and save the key through the in-app Settings modal. The key is stored locally using Electron secure storage. Never commit `.env`, an API key, or OAuth credentials to GitHub. If no key is configured, the app runs in Demo mode.
 
 ## Judge walkthrough
 
