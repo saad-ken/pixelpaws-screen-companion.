@@ -40,7 +40,7 @@ export function gmailStatus() {
   const tokens = loadTokens();
   return { connected: Boolean(tokens?.refresh_token || tokens?.access_token), configured: Boolean(process.env.GOOGLE_CLIENT_ID || DEFAULT_CLIENT_ID), email: tokens?.email || '' };
 }
-export async function connectGmail() {
+async function connectGmailFlow() {
   const { clientId, clientSecret } = clientConfig();
   const redirectUri = String(process.env.GOOGLE_REDIRECT_URI || DEFAULT_REDIRECT_URI).trim();
   const redirect = new URL(redirectUri);
@@ -74,6 +74,11 @@ export async function connectGmail() {
   oauthClient = client;
   return result;
 }
+let oauthFlow;
+export function connectGmail() {
+  if (!oauthFlow) oauthFlow = connectGmailFlow().finally(() => { oauthFlow = undefined; });
+  return oauthFlow;
+}
 export function disconnectGmail() { try { fs.rmSync(tokenPath(), { force: true }); } catch {} oauthClient = null; return { connected: false, configured: true, email: '' }; }
 export async function sendGmailMessage({ to, subject, text }) {
   const tokens = loadTokens();
@@ -84,4 +89,5 @@ export async function sendGmailMessage({ to, subject, text }) {
   const encoded = Buffer.from(raw).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   await gmail.users.messages.send({ userId: 'me', requestBody: { raw: encoded } });
 }
+
 
