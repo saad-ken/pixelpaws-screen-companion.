@@ -5,3 +5,6 @@ dist/
 *.log
 scheduled-note.*
 screen-companion-*.json
+google-oauth-client.json
+gmail-token.json
+
